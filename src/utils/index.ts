@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import { RequestHandler, Response } from "express";
 import bcrypt from "bcrypt";
 
 export function extractCharactersAfterPattern(string: string, pattern: string) {
@@ -16,18 +16,26 @@ export const catchAsync: (fn: RequestHandler) => RequestHandler =
     try {
       return fn(req, res, next);
     } catch (err) {
-      return next(err);
+      console.error(err);
+      next(err);
     }
   };
 
-export async function passwordCompare(
-  candidatePassword: string,
-  hashedPassword: string
-) {
-  try {
-    await bcrypt.compare(candidatePassword, hashedPassword);
-    return true;
-  } catch (err) {
-    return false;
-  }
+export function setJwtResCookie(res: Response, token: string) {
+  res.cookie("jwt", token, {
+    httpOnly: true,
+    maxAge: 30 * 60 * 1000,
+  });
 }
+
+// export async function passwordCompare(
+//   candidatePassword: string,
+//   hashedPassword: string
+// ) {
+//   try {
+//     await bcrypt.compare(candidatePassword, hashedPassword);
+//     return true;
+//   } catch (err) {
+//     return false;
+//   }
+// }

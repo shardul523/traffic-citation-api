@@ -11,15 +11,28 @@ import bcrypt from "bcrypt";
 export const prisma = new PrismaClient().$extends({
   model: {
     user: {
-      async signup(uid: string, name: string, password: string) {
+      async signup(uid: string, email: string, name: string, password: string) {
         const encPassword = await bcrypt.hash(password, 12);
         const user: Prisma.UserCreateInput = {
           uid,
           name,
+          email,
           password: encPassword,
         };
         const createdUser = await prisma.user.create({ data: user });
         return createdUser;
+      },
+
+      async signin(email: string, password: string) {
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user) return;
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) return;
+
+        return user;
       },
     },
   },

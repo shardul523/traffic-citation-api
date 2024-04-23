@@ -1,11 +1,9 @@
 import { LoginCredentials } from "..";
-import { Request } from "express";
 import { Prisma } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import bcrypt from "bcrypt";
 
 import { prisma } from "../config/db";
-import { catchAsync } from "../utils";
+import { catchAsync, setJwtResCookie } from "../utils";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -22,19 +20,16 @@ const verifyToken = (token: string) => jwt.verify(token, JWT_SECRET);
  * @access      PUBLIC
  */
 export const signup = catchAsync(async (req, res, next) => {
-  const { uid, name, password }: Prisma.UserCreateInput = req.body;
+  const { uid, name, password, email }: Prisma.UserCreateInput = req.body;
 
   if (uid.length !== 12) return next(new Error("Invalid UID"));
 
-  const newUser = await prisma.user.signup(uid, name, password);
+  const newUser = await prisma.user.signup(uid, email, name, password);
   const token = signToken({ id: newUser.id });
 
-  res.cookie("jwt", token, {
-    httpOnly: true,
-    maxAge: 30 * 60 * 1000,
-  });
+  setJwtResCookie(res, token);
 
-  return res.status(201).json({ user: newUser });
+  return res.status(201).json({ user: newUser, status: "success" });
 });
 
 /**
@@ -43,31 +38,19 @@ export const signup = catchAsync(async (req, res, next) => {
  * @access      PUBLIC
  */
 export const login = catchAsync(async (req, res, next) => {
-  const { uid, password }: LoginCredentials = req.body;
-  const user = await prisma.user.findUnique({
-    where: { uid },
-  });
+  const { email, password }: LoginCredentials = req.body;
 
-  console.log(user);
+  const user = await prisma.user.signin(email, password);
 
-  if (!user) return next(new Error("Invalid Credentials"));
-
-  const isPassValid = await bcrypt.compare(password, user.password);
-
-  if (!isPassValid) return next(new Error("Invalid Credentials"));
+  if (!user) return next(new Error("Invalid credentials"));
 
   const token = signToken({ id: user.id });
 
-  res.cookie("jwt", token, {
-    httpOnly: true,
-    maxAge: 30 * 60 * 1000,
-  });
+  setJwtResCookie(res, token);
 
   return res.status(200).json({
     status: "success",
-    data: {
-      message: "Login successful",
-    },
+    user,
   });
 });
 
@@ -87,7 +70,7 @@ export const authenticate = catchAsync(async (req, res, next) => {
 
   if (!decoded) return next(new Error("Not authorized"));
 
-  req.body.user = decoded.id;
+  req.body.userId = decoded.id;
 
   next();
 });
