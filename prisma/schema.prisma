@@ -21,7 +21,8 @@ enum ChallanStatus {
 
 model Challan {
   id                  Int           @id @default(autoincrement())
-  issuedAt            DateTime
+  issuedAt            DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
   violation           String
   fineAmount          Float
   status              ChallanStatus

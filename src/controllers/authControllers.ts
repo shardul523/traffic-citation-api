@@ -1,18 +1,10 @@
 import { LoginCredentials } from "..";
 import { Prisma } from "@prisma/client";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
 
 import { prisma } from "../config/db";
-import { catchAsync, setJwtResCookie } from "../utils";
-
-const JWT_SECRET = process.env.JWT_SECRET;
-
-const signToken = (payload: string | object) =>
-  jwt.sign(payload, JWT_SECRET, {
-    expiresIn: "30m",
-  });
-
-const verifyToken = (token: string) => jwt.verify(token, JWT_SECRET);
+import { catchAsync } from "../utils/index";
+import { signToken, verifyToken, setJwtResCookie } from "../utils/jwt";
 
 /**
  * @description Sign Up New Users
@@ -60,8 +52,6 @@ export const login = catchAsync(async (req, res, next) => {
  * @access      Private
  */
 export const authenticate = catchAsync(async (req, res, next) => {
-  console.log(req.cookies);
-
   if (!req.cookies?.jwt) return next(new Error("Not authorized"));
 
   const token = req.cookies?.jwt;

@@ -21,13 +21,6 @@ export const catchAsync: (fn: RequestHandler) => RequestHandler =
     }
   };
 
-export function setJwtResCookie(res: Response, token: string) {
-  res.cookie("jwt", token, {
-    httpOnly: true,
-    maxAge: 30 * 60 * 1000,
-  });
-}
-
 // export async function passwordCompare(
 //   candidatePassword: string,
 //   hashedPassword: string
