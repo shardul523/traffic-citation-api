@@ -11,6 +11,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/v1", rootRouter);
-app.all("*", errorMiddleware);
+app.use(errorMiddleware);
 
 export default app;

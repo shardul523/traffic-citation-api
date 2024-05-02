@@ -14,9 +14,9 @@ export function extractCharactersAfterPattern(string: string, pattern: string) {
 export const catchAsync: (fn: RequestHandler) => RequestHandler =
   (fn: RequestHandler) => (req, res, next) => {
     try {
-      return fn(req, res, next);
+      fn(req, res, next);
     } catch (err) {
-      console.error(err);
+      console.log(err);
       next(err);
     }
   };
