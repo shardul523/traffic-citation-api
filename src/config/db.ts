@@ -71,5 +71,18 @@ export const prisma = new PrismaClient().$extends({
         return officer;
       },
     },
+    admin: {
+      async signin(email: string, password: string) {
+        const user = await prisma.admin.findUnique({ where: { email } });
+
+        if (!user) return;
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) return;
+
+        return user;
+      },
+    },
   },
 });

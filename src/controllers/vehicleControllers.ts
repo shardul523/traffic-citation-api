@@ -8,14 +8,14 @@ import { RequestHandler } from "express";
  * @access          private
  */
 export const registerNewVehicle = async (req, res, next) => {
-  const { licencePlate }: Prisma.VehicleCreateInput = req.body;
+  const { licencePlate, vehicleType }: Prisma.VehicleCreateInput = req.body;
 
   if (!licencePlate || licencePlate.length !== 10)
     return next(new Error("Invalid license plate"));
 
   try {
     const newVehicle = await prisma.vehicle.create({
-      data: { licencePlate, userId: req.body.userId },
+      data: { licencePlate, userId: req.body.userId, vehicleType },
     });
 
     return res.status(201).json({
@@ -49,5 +49,27 @@ export const getVehicleByPlate: RequestHandler = async (req, res, next) => {
     });
   } catch (err) {
     return next(err);
+  }
+};
+
+/**
+ * @description   Delete registered vehicles
+ * @route         DELETE /vehicles/:licencePlate
+ * @access        admin
+ */
+export const deleteVehicleByPlate: RequestHandler = async (req, res, next) => {
+  const { licencePlate } = req.params;
+
+  try {
+    await prisma.vehicle.delete({
+      where: { licencePlate },
+    });
+
+    return res.status(204).json({
+      status: "success",
+      message: "Vehicle deleted successfully",
+    });
+  } catch (err) {
+    next(err);
   }
 };

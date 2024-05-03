@@ -17,7 +17,7 @@ export const userSignup = catchAsync(async (req, res, next) => {
   if (uid.length !== 12) return next(new Error("Invalid UID"));
 
   const newUser = await prisma.user.signup(uid, email, name, password);
-  const token = signToken({ id: newUser.id, isOfficer: false });
+  const token = signToken({ id: newUser.id, isOfficer: false, isAdmin: false });
 
   setJwtResCookie(res, token);
 
@@ -36,7 +36,7 @@ export const userLogin = catchAsync(async (req, res, next) => {
 
   if (!user) return next(new Error("Invalid credentials"));
 
-  const token = signToken({ id: user.id, isOfficer: false });
+  const token = signToken({ id: user.id, isOfficer: false, isAdmin: false });
 
   setJwtResCookie(res, token);
 
@@ -63,7 +63,11 @@ export const officerSignup = catchAsync(async (req, res, next) => {
     name,
     password
   );
-  const token = signToken({ id: newOfficer.id, isOfficer: true });
+  const token = signToken({
+    id: newOfficer.id,
+    isOfficer: true,
+    isAdmin: false,
+  });
 
   setJwtResCookie(res, token);
 
@@ -82,7 +86,7 @@ export const officerSignin = catchAsync(async (req, res, next) => {
 
   if (!officer) return next(new Error("Invalid credentials"));
 
-  const token = signToken({ id: officer.id, isOfficer: true });
+  const token = signToken({ id: officer.id, isOfficer: true, isAdmin: false });
 
   setJwtResCookie(res, token);
 
@@ -90,6 +94,26 @@ export const officerSignin = catchAsync(async (req, res, next) => {
     status: "success",
     officer,
   });
+});
+
+/**
+ * @description   Sign up admin user
+ * @route         POST /signup/admin
+ * @access        public
+ */
+export const adminSignup = catchAsync(async (req, res, next) => {
+  const { password, email }: Prisma.AdminCreateInput = req.body;
+
+  const newAdmin = await prisma.admin.create({ data: { email, password } });
+  const token = signToken({
+    id: newAdmin.id,
+    isOfficer: false,
+    isAdmin: false,
+  });
+
+  setJwtResCookie(res, token);
+
+  return res.status(201).json({ admin: newAdmin, status: "success" });
 });
 
 /**
@@ -112,6 +136,28 @@ export const authenticate = catchAsync(async (req, res, next) => {
   else req.body.userId = decoded.id;
 
   next();
+});
+
+/**
+ * @description Login Admins
+ * @route       POST /auth/login/admin
+ * @access      public
+ */
+export const adminLogin = catchAsync(async (req, res, next) => {
+  const { email, password }: UserLoginCredentials = req.body;
+
+  const user = await prisma.admin.signin(email, password);
+
+  if (!user) return next(new Error("Invalid credentials"));
+
+  const token = signToken({ id: user.id, isOfficer: false, isAdmin: false });
+
+  setJwtResCookie(res, token);
+
+  return res.status(200).json({
+    status: "success",
+    user,
+  });
 });
 
 /**

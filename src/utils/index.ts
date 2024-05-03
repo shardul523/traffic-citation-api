@@ -12,14 +12,8 @@ export function extractCharactersAfterPattern(string: string, pattern: string) {
 }
 
 export const catchAsync: (fn: RequestHandler) => RequestHandler =
-  (fn: RequestHandler) => (req, res, next) => {
-    try {
-      fn(req, res, next);
-    } catch (err) {
-      console.log(err);
-      next(err);
-    }
-  };
+  (fn) => (req, res, next) =>
+    Promise.resolve(fn(req, res, next)).catch(next);
 
 // export async function passwordCompare(
 //   candidatePassword: string,
