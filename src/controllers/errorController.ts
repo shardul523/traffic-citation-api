@@ -7,7 +7,7 @@ export const errorMiddleware: ErrorRequestHandler = (
   next
 ) => {
   res.status(500).json({
-    error: err,
+    error: err.message,
     status: "fail",
   });
 };

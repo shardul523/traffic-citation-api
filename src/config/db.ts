@@ -72,6 +72,16 @@ export const prisma = new PrismaClient().$extends({
       },
     },
     admin: {
+      async signup(email: string, password: string) {
+        const encPassword = await bcrypt.hash(password, 12);
+        const user: Prisma.AdminCreateInput = {
+          email,
+          password: encPassword,
+        };
+        const createdUser = await prisma.admin.create({ data: user });
+        return createdUser;
+      },
+
       async signin(email: string, password: string) {
         const user = await prisma.admin.findUnique({ where: { email } });
 

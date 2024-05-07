@@ -104,7 +104,7 @@ export const officerSignin = catchAsync(async (req, res, next) => {
 export const adminSignup = catchAsync(async (req, res, next) => {
   const { password, email }: Prisma.AdminCreateInput = req.body;
 
-  const newAdmin = await prisma.admin.create({ data: { email, password } });
+  const newAdmin = await prisma.admin.signup(email, password);
   const token = signToken({
     id: newAdmin.id,
     isOfficer: false,
@@ -114,28 +114,6 @@ export const adminSignup = catchAsync(async (req, res, next) => {
   setJwtResCookie(res, token);
 
   return res.status(201).json({ admin: newAdmin, status: "success" });
-});
-
-/**
- * @description Check if users are logged in
- * @route       GET /api/v1/auth/authenticate
- * @access      Private
- */
-export const authenticate = catchAsync(async (req, res, next) => {
-  if (!req.cookies?.jwt) return next(new Error("Not authorized"));
-
-  const token = req.cookies?.jwt;
-
-  const decoded = verifyToken(token) as JwtPayload;
-
-  if (!decoded) return next(new Error("Not authenticated"));
-
-  req.body.isOfficer = decoded.isOfficer;
-
-  if (req.body.isOfficer) req.body.officerId = decoded.id;
-  else req.body.userId = decoded.id;
-
-  next();
 });
 
 /**
@@ -158,6 +136,28 @@ export const adminLogin = catchAsync(async (req, res, next) => {
     status: "success",
     user,
   });
+});
+
+/**
+ * @description Check if users are logged in
+ * @route       GET /api/v1/auth/authenticate
+ * @access      Private
+ */
+export const authenticate = catchAsync(async (req, res, next) => {
+  if (!req.cookies?.jwt) return next(new Error("Not authorized"));
+
+  const token = req.cookies?.jwt;
+
+  const decoded = verifyToken(token) as JwtPayload;
+
+  if (!decoded) return next(new Error("Not authenticated"));
+
+  req.body.isOfficer = decoded.isOfficer;
+
+  if (req.body.isOfficer) req.body.officerId = decoded.id;
+  else req.body.userId = decoded.id;
+
+  next();
 });
 
 /**
