@@ -108,7 +108,7 @@ export const adminSignup = catchAsync(async (req, res, next) => {
   const token = signToken({
     id: newAdmin.id,
     isOfficer: false,
-    isAdmin: false,
+    isAdmin: true,
   });
 
   setJwtResCookie(res, token);
@@ -128,7 +128,7 @@ export const adminLogin = catchAsync(async (req, res, next) => {
 
   if (!user) return next(new Error("Invalid credentials"));
 
-  const token = signToken({ id: user.id, isOfficer: false, isAdmin: false });
+  const token = signToken({ id: user.id, isOfficer: false, isAdmin: true });
 
   setJwtResCookie(res, token);
 
@@ -152,9 +152,12 @@ export const authenticate = catchAsync(async (req, res, next) => {
 
   if (!decoded) return next(new Error("Not authenticated"));
 
-  req.body.isOfficer = decoded.isOfficer;
+  if (decoded.isAdmin) req.body.role = "admin";
+  else if (decoded.isOfficer) req.body.role = "officer";
+  else req.body.role = "user";
 
-  if (req.body.isOfficer) req.body.officerId = decoded.id;
+  if (req.body.role === "admin") req.body.adminId = decoded.id;
+  else if (req.body.role === "officer") req.body.officerId = decoded.id;
   else req.body.userId = decoded.id;
 
   next();
@@ -165,8 +168,9 @@ export const authenticate = catchAsync(async (req, res, next) => {
  * @route         MIDDLEWARE
  * @access        private
  */
-export const authorizeOfficer = catchAsync(async (req, res, next) => {
-  if (!req.body.isOfficer) return next(new Error("Unauthorized!"));
+export const authorize = (role: string) =>
+  catchAsync(async (req, res, next) => {
+    if (req.body.role !== role) return next(new Error("Unauthorized!"));
 
-  return next();
-});
+    return next();
+  });

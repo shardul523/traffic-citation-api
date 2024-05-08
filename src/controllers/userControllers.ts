@@ -41,3 +41,19 @@ export const updateCurrentUser = catchAsync(async (req, res, next) => {
     user: updatedUser,
   });
 });
+
+/**
+ * @description   Delete User By Id
+ * @route         DELETE /users/:userId
+ * @access        admin
+ */
+export const deleteUserById = catchAsync(async (req, res) => {
+  const { userId }: { userId?: string } = req.params;
+
+  await prisma.user.delete({ where: { id: +userId } });
+
+  return res.status(204).json({
+    status: "success",
+    message: "User Deleted Successfully",
+  });
+});

@@ -1,44 +1,41 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../config/db";
 import { RequestHandler } from "express";
+import { catchAsync } from "../utils";
 
 /**
  * @description     Register new vehicle
  * @route           POST /vehicles
  * @access          private
  */
-export const registerNewVehicle = async (req, res, next) => {
+export const registerNewVehicle = catchAsync(async (req, res, next) => {
   const { licencePlate, vehicleType }: Prisma.VehicleCreateInput = req.body;
+  const { userId }: { userId: string } = req.body;
 
-  if (!licencePlate || licencePlate.length !== 10)
-    return next(new Error("Invalid license plate"));
+  if (!licencePlate) return next(new Error("Invalid license plate"));
 
-  try {
-    const newVehicle = await prisma.vehicle.create({
-      data: { licencePlate, userId: req.body.userId, vehicleType },
-    });
+  const newVehicle = await prisma.vehicle.create({
+    data: { licencePlate, userId: +userId, vehicleType },
+  });
 
-    return res.status(201).json({
-      status: "success",
-      vehicle: newVehicle,
-    });
-  } catch (err) {
-    return next(err);
-  }
-};
+  return res.status(201).json({
+    status: "success",
+    vehicle: newVehicle,
+  });
+});
 
 /**
  * @description     Get vehicle by license plate
  * @route           GET /vehicles/:licensePlate
  * @access          private
  */
-export const getVehicleByPlate: RequestHandler = async (req, res, next) => {
-  const { licencePlate } = req.params;
+export const getVehicleByPlate: RequestHandler = catchAsync(
+  async (req, res, next) => {
+    const { licencePlate } = req.params;
 
-  if (licencePlate.length !== 10)
-    return next(new Error("Invalid license plate"));
+    if (licencePlate.length !== 10)
+      return next(new Error("Invalid license plate"));
 
-  try {
     const vehicle = await prisma.vehicle.findUnique({
       where: { licencePlate },
     });
@@ -47,20 +44,18 @@ export const getVehicleByPlate: RequestHandler = async (req, res, next) => {
       status: "success",
       vehicle,
     });
-  } catch (err) {
-    return next(err);
   }
-};
+);
 
 /**
  * @description   Delete registered vehicles
  * @route         DELETE /vehicles/:licencePlate
  * @access        admin
  */
-export const deleteVehicleByPlate: RequestHandler = async (req, res, next) => {
-  const { licencePlate } = req.params;
+export const deleteVehicleByPlate: RequestHandler = catchAsync(
+  async (req, res, next) => {
+    const { licencePlate } = req.params;
 
-  try {
     await prisma.vehicle.delete({
       where: { licencePlate },
     });
@@ -69,7 +64,5 @@ export const deleteVehicleByPlate: RequestHandler = async (req, res, next) => {
       status: "success",
       message: "Vehicle deleted successfully",
     });
-  } catch (err) {
-    next(err);
   }
-};
+);
