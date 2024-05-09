@@ -26,3 +26,16 @@ export const catchAsync: (fn: RequestHandler) => RequestHandler =
 //     return false;
 //   }
 // }
+
+export function getViolationFine(violation: string): number {
+  switch (violation) {
+    case "overspeeding":
+      return 500;
+    case "no licence":
+      return 1000;
+    case "missing documents":
+      return 750;
+    default:
+      return 1500;
+  }
+}

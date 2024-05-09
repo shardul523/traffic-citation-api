@@ -2,7 +2,12 @@ import path from "path";
 import multer from "multer";
 
 import { py, pyModule } from "../config/py";
-import { catchAsync, extractCharactersAfterPattern } from "../utils";
+import {
+  catchAsync,
+  extractCharactersAfterPattern,
+  getViolationFine,
+} from "../utils";
+import { prisma } from "../config/db";
 
 const upload = multer();
 
@@ -23,7 +28,40 @@ export const sendVehicleNumberPlate = catchAsync(async (req, res) => {
  * @route         POST /challans
  * @access        private -> officer
  */
-export const createNewChallan = catchAsync(async (req, res) => {});
+export const createNewChallan = catchAsync(async (req, res, next) => {
+  const {
+    licencePlate: vehicleLicensePlate,
+    violation,
+  }: { licencePlate: string; violation: string } = req.body;
+
+  if (!vehicleLicensePlate)
+    return next(new Error("Vehicle Licence Plate must be specified"));
+
+  if (!violation) return next(new Error("Violation should be specified"));
+
+  const officer = await prisma.officer.findUnique({
+    where: { id: req.body.officerId },
+  });
+
+  // Calculate fine amount using violation
+  const fineAmount = getViolationFine(violation);
+
+  const newChallan = await prisma.challan.create({
+    data: {
+      vehicleLicensePlate,
+      officerId: officer.officerId,
+      fineAmount,
+      violation,
+      status: "ISSUED",
+    },
+  });
+
+  return res.status(201).json({
+    status: "success",
+    message: "Challan issued",
+    challan: newChallan,
+  });
+});
 
 /**
  * @description   Get challans of a vehicle

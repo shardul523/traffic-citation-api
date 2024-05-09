@@ -53,7 +53,7 @@ export const getVehicleByPlate: RequestHandler = catchAsync(
  * @access        admin
  */
 export const deleteVehicleByPlate: RequestHandler = catchAsync(
-  async (req, res, next) => {
+  async (req, res) => {
     const { licencePlate } = req.params;
 
     await prisma.vehicle.delete({
