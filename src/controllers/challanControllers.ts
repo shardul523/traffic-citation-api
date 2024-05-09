@@ -1,7 +1,7 @@
 import path from "path";
 import multer from "multer";
 
-import { py, pyModule } from "../config/py";
+// import { py, pyModule } from "../config/py";
 import {
   catchAsync,
   extractCharactersAfterPattern,
@@ -13,15 +13,15 @@ const upload = multer();
 
 export const uploadVehicleImage = upload.single("vehicle-image");
 
-export const sendVehicleNumberPlate = catchAsync(async (req, res) => {
-  const result: any = await py.call(
-    pyModule,
-    "number_plate_reader",
-    path.join(__dirname, "..", "data/images", "car.jpg")
-  );
+// export const sendVehicleNumberPlate = catchAsync(async (req, res) => {
+//   const result: any = await py.call(
+//     pyModule,
+//     "number_plate_reader",
+//     path.join(__dirname, "..", "data/images", "car.jpg")
+//   );
 
-  res.send(extractCharactersAfterPattern(result, "Number Plate:"));
-});
+//   res.send(extractCharactersAfterPattern(result, "Number Plate:"));
+// });
 
 /**
  * @description   Generate new challan
@@ -90,3 +90,19 @@ export const getChallanById = catchAsync(async (req, res) => {});
  * @access        private
  */
 export const updateChallanToPaid = catchAsync(async (req, res) => {});
+
+/**
+ * @description   Delete challan by id
+ * @route         DELETE /challans/:challanId
+ * @access        admin
+ */
+export const deleteChallanById = catchAsync(async (req, res) => {
+  const challanId = +req.params.challanId;
+
+  await prisma.challan.delete({ where: { id: challanId } });
+
+  return res.status(200).json({
+    status: "success",
+    message: "Challan deleted successfully",
+  });
+});

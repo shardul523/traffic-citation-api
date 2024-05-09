@@ -4,13 +4,15 @@ export interface UserLoginCredentials {
 }
 
 export interface OfficerLoginCredentials {
-  officerId: string;
+  email: string;
   password: string;
 }
 
 declare module "jsonwebtoken" {
   export interface JwtPayload {
     id: number;
-    isOfficer: boolean;
+    role: string;
+    uid?: string;
+    officerId?: string;
   }
 }

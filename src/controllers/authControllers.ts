@@ -17,7 +17,11 @@ export const userSignup = catchAsync(async (req, res, next) => {
   if (uid.length !== 12) return next(new Error("Invalid UID"));
 
   const newUser = await prisma.user.signup(uid, email, name, password);
-  const token = signToken({ id: newUser.id, isOfficer: false, isAdmin: false });
+  const token = signToken({
+    id: newUser.id,
+    role: "user",
+    uid: newUser.uid,
+  });
 
   setJwtResCookie(res, token);
 
@@ -36,7 +40,11 @@ export const userLogin = catchAsync(async (req, res, next) => {
 
   if (!user) return next(new Error("Invalid credentials"));
 
-  const token = signToken({ id: user.id, isOfficer: false, isAdmin: false });
+  const token = signToken({
+    id: user.id,
+    role: "user",
+    uid: user.uid,
+  });
 
   setJwtResCookie(res, token);
 
@@ -65,8 +73,8 @@ export const officerSignup = catchAsync(async (req, res, next) => {
   );
   const token = signToken({
     id: newOfficer.id,
-    isOfficer: true,
-    isAdmin: false,
+    role: "officer",
+    officerId,
   });
 
   setJwtResCookie(res, token);
@@ -80,13 +88,17 @@ export const officerSignup = catchAsync(async (req, res, next) => {
  * @access          public
  */
 export const officerSignin = catchAsync(async (req, res, next) => {
-  const { officerId, password }: OfficerLoginCredentials = req.body;
+  const { email, password }: OfficerLoginCredentials = req.body;
 
-  const officer = await prisma.officer.signin(officerId, password);
+  const officer = await prisma.officer.signin(email, password);
 
   if (!officer) return next(new Error("Invalid credentials"));
 
-  const token = signToken({ id: officer.id, isOfficer: true, isAdmin: false });
+  const token = signToken({
+    id: officer.id,
+    role: "officer",
+    officerId: officer.officerId,
+  });
 
   setJwtResCookie(res, token);
 
@@ -107,8 +119,7 @@ export const adminSignup = catchAsync(async (req, res, next) => {
   const newAdmin = await prisma.admin.signup(email, password);
   const token = signToken({
     id: newAdmin.id,
-    isOfficer: false,
-    isAdmin: true,
+    role: "admin",
   });
 
   setJwtResCookie(res, token);
@@ -128,7 +139,7 @@ export const adminLogin = catchAsync(async (req, res, next) => {
 
   if (!user) return next(new Error("Invalid credentials"));
 
-  const token = signToken({ id: user.id, isOfficer: false, isAdmin: true });
+  const token = signToken({ id: user.id, role: "admin" });
 
   setJwtResCookie(res, token);
 
@@ -152,13 +163,18 @@ export const authenticate = catchAsync(async (req, res, next) => {
 
   if (!decoded) return next(new Error("Not authenticated"));
 
-  if (decoded.isAdmin) req.body.role = "admin";
-  else if (decoded.isOfficer) req.body.role = "officer";
-  else req.body.role = "user";
+  req.body.auth = { id: decoded.id, role: decoded.role };
 
-  if (req.body.role === "admin") req.body.adminId = decoded.id;
-  else if (req.body.role === "officer") req.body.officerId = decoded.id;
-  else req.body.userId = decoded.id;
+  switch (decoded.role) {
+    case "user":
+      req.body.auth.uid = decoded.uid;
+      break;
+    case "officer":
+      req.body.auth.officerId = decoded.officerId;
+      break;
+    default:
+      break;
+  }
 
   next();
 });
@@ -170,7 +186,7 @@ export const authenticate = catchAsync(async (req, res, next) => {
  */
 export const authorize = (role: string) =>
   catchAsync(async (req, res, next) => {
-    if (req.body.role !== role) return next(new Error("Unauthorized!"));
+    if (req.body.auth.role !== role) return next(new Error("Unauthorized!"));
 
     return next();
   });

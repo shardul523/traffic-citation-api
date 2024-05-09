@@ -54,9 +54,9 @@ export const prisma = new PrismaClient().$extends({
         return createdOfficer;
       },
 
-      async signin(officerId: string, password: string) {
+      async signin(email: string, password: string) {
         const officer = await prisma.officer.findUnique({
-          where: { officerId },
+          where: { email },
         });
 
         if (!officer) return;

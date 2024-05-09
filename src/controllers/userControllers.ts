@@ -7,9 +7,9 @@ import { prisma } from "../config/db";
  * @access      private
  */
 export const getCurrentUser = catchAsync(async (req, res, next) => {
-  const { userId } = req.body;
+  const { id } = req.body.auth;
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({ where: { id } });
 
   if (!user) return next(new Error("Invalid Jwt"));
 
@@ -22,11 +22,12 @@ export const getCurrentUser = catchAsync(async (req, res, next) => {
  * @access      private
  */
 export const updateCurrentUser = catchAsync(async (req, res, next) => {
-  const { userId, email, password, name } = req.body;
+  const { email, password, name } = req.body;
+  const { id } = req.body.auth;
 
   const updatedUser = await prisma.user.update({
     where: {
-      id: userId,
+      id,
     },
     data: {
       email,

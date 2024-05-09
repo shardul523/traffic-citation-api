@@ -2,19 +2,20 @@ import { Router } from "express";
 
 import {
   uploadVehicleImage,
-  sendVehicleNumberPlate,
+  // sendVehicleNumberPlate,
   createNewChallan,
+  deleteChallanById,
 } from "../controllers/challanControllers";
 import { authenticate, authorize } from "../controllers/authControllers";
 
 const router = Router();
 
-router.post("/vehicle-image", sendVehicleNumberPlate);
+// router.post("/vehicle-image", sendVehicleNumberPlate);
 
 router.use(authenticate);
 
-router.use(authorize("officer"));
+router.route("/").post(authorize("officer"), createNewChallan);
 
-router.route("/").post(createNewChallan);
+router.route("/:challanId").delete(authorize("admin"), deleteChallanById);
 
 export default router;
