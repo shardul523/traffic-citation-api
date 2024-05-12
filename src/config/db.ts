@@ -1,12 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-// import { connect } from 'mongoose'
-
-// export async function connectDB() {
-//     const MONGO_URI = process.env.DATABASE_URI.replace('<password>', process.env.DATABASE_PASSWORD)
-//     await connect(MONGO_URI)
-//     console.log('Database connected')
-// }
 
 export const prisma = new PrismaClient().$extends({
   model: {

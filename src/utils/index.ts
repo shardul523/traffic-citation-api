@@ -1,5 +1,4 @@
-import { RequestHandler, Response } from "express";
-import bcrypt from "bcrypt";
+import { RequestHandler } from "express";
 
 export function extractCharactersAfterPattern(string: string, pattern: string) {
   const match = string.match(pattern);
@@ -14,18 +13,6 @@ export function extractCharactersAfterPattern(string: string, pattern: string) {
 export const catchAsync: (fn: RequestHandler) => RequestHandler =
   (fn) => (req, res, next) =>
     Promise.resolve(fn(req, res, next)).catch(next);
-
-// export async function passwordCompare(
-//   candidatePassword: string,
-//   hashedPassword: string
-// ) {
-//   try {
-//     await bcrypt.compare(candidatePassword, hashedPassword);
-//     return true;
-//   } catch (err) {
-//     return false;
-//   }
-// }
 
 export function getViolationFine(violation: string): number {
   switch (violation) {

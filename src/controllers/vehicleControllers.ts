@@ -15,7 +15,7 @@ export const registerNewVehicle = catchAsync(async (req, res, next) => {
   if (!licencePlate) return next(new Error("Invalid license plate"));
 
   const newVehicle = await prisma.vehicle.create({
-    data: { licencePlate, userId: +userId, vehicleType },
+    data: { licencePlate, userId, vehicleType },
   });
 
   return res.status(201).json({

@@ -8,7 +8,7 @@ import { signToken, verifyToken, setJwtResCookie } from "../utils/jwt";
 
 /**
  * @description Sign Up New Users
- * @route       POST /api/v1/auth/signup
+ * @route       POST auth/signup/user
  * @access      PUBLIC
  */
 export const userSignup = catchAsync(async (req, res, next) => {
@@ -30,7 +30,7 @@ export const userSignup = catchAsync(async (req, res, next) => {
 
 /**
  * @description Login Users
- * @route       POST /api/v1/auth/login
+ * @route       POST /auth/login/user
  * @access      PUBLIC
  */
 export const userLogin = catchAsync(async (req, res, next) => {
@@ -56,7 +56,7 @@ export const userLogin = catchAsync(async (req, res, next) => {
 
 /**
  * @description     Sign Up New Officer
- * @route           POST /signup/officer
+ * @route           POST auth/signup/officer
  * @access          public
  */
 export const officerSignup = catchAsync(async (req, res, next) => {
@@ -84,7 +84,7 @@ export const officerSignup = catchAsync(async (req, res, next) => {
 
 /**
  * @description     Sign In Officer
- * @route           POST /signin/officer
+ * @route           POST auth/login/officer
  * @access          public
  */
 export const officerSignin = catchAsync(async (req, res, next) => {
@@ -110,7 +110,7 @@ export const officerSignin = catchAsync(async (req, res, next) => {
 
 /**
  * @description   Sign up admin user
- * @route         POST /signup/admin
+ * @route         POST auth/signup/admin
  * @access        public
  */
 export const adminSignup = catchAsync(async (req, res, next) => {
@@ -129,7 +129,7 @@ export const adminSignup = catchAsync(async (req, res, next) => {
 
 /**
  * @description Login Admins
- * @route       POST /auth/login/admin
+ * @route       POST auth/login/admin
  * @access      public
  */
 export const adminLogin = catchAsync(async (req, res, next) => {
@@ -151,7 +151,7 @@ export const adminLogin = catchAsync(async (req, res, next) => {
 
 /**
  * @description Check if users are logged in
- * @route       GET /api/v1/auth/authenticate
+ * @route       MIDDLEWARE
  * @access      Private
  */
 export const authenticate = catchAsync(async (req, res, next) => {
