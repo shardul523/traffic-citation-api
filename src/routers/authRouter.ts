@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   adminLogin,
   adminSignup,
+  logout,
   officerSignin,
   officerSignup,
   userLogin,
@@ -21,5 +22,7 @@ router.post("/login/officer", officerSignin);
 // router.post("/signup/admin", adminSignup);
 
 router.post("/login/admin", adminLogin);
+
+router.delete("/logout", logout);
 
 export default router;

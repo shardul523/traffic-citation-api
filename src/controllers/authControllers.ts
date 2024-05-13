@@ -5,6 +5,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../config/db";
 import { catchAsync } from "../utils/index";
 import { signToken, verifyToken, setJwtResCookie } from "../utils/jwt";
+import { RequestHandler } from "express";
 
 /**
  * @description Sign Up New Users
@@ -190,3 +191,17 @@ export const authorize = (role: string) =>
 
     return next();
   });
+
+/**
+ * @description   Logout
+ * @route         DELETE  /auth/logout
+ * @access        public
+ */
+export const logout: RequestHandler = async (req, res) => {
+  res.clearCookie("jwt");
+
+  return res.status(200).json({
+    status: "success",
+    message: "Logout successful",
+  });
+};
