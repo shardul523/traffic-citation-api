@@ -32,16 +32,17 @@ export const createNewChallan = catchAsync(async (req, res, next) => {
   const {
     licencePlate: vehicleLicensePlate,
     violation,
-  }: { licencePlate: string; violation: string } = req.body;
+    auth,
+  }: {
+    licencePlate: string;
+    violation: string;
+    auth: { officerId: string };
+  } = req.body;
 
   if (!vehicleLicensePlate)
     return next(new Error("Vehicle Licence Plate must be specified"));
 
   if (!violation) return next(new Error("Violation should be specified"));
-
-  const officer = await prisma.officer.findUnique({
-    where: { id: req.body.officerId },
-  });
 
   // Calculate fine amount using violation
   const fineAmount = getViolationFine(violation);
@@ -49,7 +50,7 @@ export const createNewChallan = catchAsync(async (req, res, next) => {
   const newChallan = await prisma.challan.create({
     data: {
       vehicleLicensePlate,
-      officerId: officer.officerId,
+      officerId: auth.officerId,
       fineAmount,
       violation,
       status: "ISSUED",
