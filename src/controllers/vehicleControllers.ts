@@ -10,12 +10,13 @@ import { catchAsync } from "../utils";
  */
 export const registerNewVehicle = catchAsync(async (req, res, next) => {
   const { licencePlate, vehicleType }: Prisma.VehicleCreateInput = req.body;
-  const { userId }: { userId: string } = req.body;
+  const { auth } = req.body;
+  const { uid }: { uid: string } = auth;
 
   if (!licencePlate) return next(new Error("Invalid license plate"));
 
   const newVehicle = await prisma.vehicle.create({
-    data: { licencePlate, userId, vehicleType },
+    data: { licencePlate, uid, vehicleType },
   });
 
   return res.status(201).json({
@@ -32,9 +33,6 @@ export const registerNewVehicle = catchAsync(async (req, res, next) => {
 export const getVehicleByPlate: RequestHandler = catchAsync(
   async (req, res, next) => {
     const { licencePlate } = req.params;
-
-    if (licencePlate.length !== 10)
-      return next(new Error("Invalid license plate"));
 
     const vehicle = await prisma.vehicle.findUnique({
       where: { licencePlate },

@@ -41,11 +41,11 @@ model Challan {
 
 model Vehicle {
   id           Int         @id @default(autoincrement())
-  licencePlate String      @unique @db.Char(10)
+  licencePlate String      @unique
   vehicleType  VehicleType @default(FOUR_WHEELER)
   challans     Challan[]
-  User         User?       @relation(fields: [userId], references: [uid])
-  userId       String?
+  User         User?       @relation(fields: [uid], references: [uid])
+  uid          String?
 
   @@map("vehicles")
 }

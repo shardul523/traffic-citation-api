@@ -7,9 +7,14 @@ import { catchAsync } from "../utils";
  * @access          private->officer
  */
 export const getCurrentOfficer = catchAsync(async (req, res) => {
-  const officerId = +req.body.officerId;
+  const {
+    auth: { officerId },
+  } = req.body;
 
-  const officer = await prisma.officer.findUnique({ where: { id: officerId } });
+  const officer = await prisma.officer.findUnique({
+    where: { officerId },
+    select: { name: true, email: true, officerId: true },
+  });
 
   return res.status(200).json({
     status: "success",

@@ -26,7 +26,9 @@ export const userSignup = catchAsync(async (req, res, next) => {
 
   setJwtResCookie(res, token);
 
-  return res.status(201).json({ user: newUser, status: "success" });
+  return res
+    .status(201)
+    .json({ message: "User Signed Up", role: "user", status: "success" });
 });
 
 /**
@@ -51,7 +53,8 @@ export const userLogin = catchAsync(async (req, res, next) => {
 
   return res.status(200).json({
     status: "success",
-    user,
+    message: "User signed in",
+    role: "user",
   });
 });
 
@@ -80,7 +83,9 @@ export const officerSignup = catchAsync(async (req, res, next) => {
 
   setJwtResCookie(res, token);
 
-  return res.status(201).json({ officer: newOfficer, status: "success" });
+  return res
+    .status(201)
+    .json({ message: "Officer signed up", status: "success", role: "officer" });
 });
 
 /**
@@ -105,7 +110,8 @@ export const officerSignin = catchAsync(async (req, res, next) => {
 
   return res.status(200).json({
     status: "success",
-    officer,
+    message: "Officer signed in",
+    role: "officer",
   });
 });
 
