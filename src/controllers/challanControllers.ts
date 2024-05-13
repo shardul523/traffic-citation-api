@@ -65,18 +65,45 @@ export const createNewChallan = catchAsync(async (req, res, next) => {
 });
 
 /**
- * @description   Get challans of a vehicle
- * @route         GET /challans
- * @access        private -> officer
+ * @description   Get challans of an officer
+ * @route         GET /challans/officer/me
+ * @access        private
  */
-export const getVehicleChallans = catchAsync(async (req, res) => {});
+export const getOfficerChallans = catchAsync(async (req, res) => {
+  const { auth } = req.body;
+  const { officerId }: { officerId: string; role: string } = auth;
+  const challans = await prisma.challan.findMany({ where: { officerId } });
+
+  return res.status(200).json({
+    status: "success",
+    challans,
+  });
+});
 
 /**
  * @description   Get challans of a user
- * @route         GET /challans/me
+ * @route         GET /challans/user/me
  * @access        private -> user
  */
-export const getUserChallans = catchAsync(async (req, res) => {});
+export const getUserChallans = catchAsync(async (req, res) => {
+  const { auth } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { id: auth.id },
+    select: { vehicles: true },
+  });
+
+  const licencePlates = user.vehicles.map((vehicle) => vehicle.licencePlate);
+
+  const challans = await prisma.challan.findMany({
+    where: { vehicleLicensePlate: { in: licencePlates } },
+  });
+
+  return res.status(200).json({
+    status: "success",
+    challans,
+  });
+});
 
 /**
  * @description   Get challan by id
