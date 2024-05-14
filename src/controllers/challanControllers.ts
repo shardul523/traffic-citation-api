@@ -1,5 +1,4 @@
 import path from "path";
-import multer from "multer";
 
 // import { py, pyModule } from "../config/py";
 import {
@@ -8,10 +7,6 @@ import {
   getViolationFine,
 } from "../utils";
 import { prisma } from "../config/db";
-
-const upload = multer();
-
-export const uploadVehicleImage = upload.single("vehicle-image");
 
 // export const sendVehicleNumberPlate = catchAsync(async (req, res) => {
 //   const result: any = await py.call(
@@ -22,6 +17,13 @@ export const uploadVehicleImage = upload.single("vehicle-image");
 
 //   res.send(extractCharactersAfterPattern(result, "Number Plate:"));
 // });
+
+export const sendVehicleDetails = catchAsync(async (req, res, next) => {
+  res.status(200).json({
+    status: "success",
+    file: req.file,
+  });
+});
 
 /**
  * @description   Generate new challan
@@ -110,14 +112,35 @@ export const getUserChallans = catchAsync(async (req, res) => {
  * @route         GET /challans/:challanId
  * @access        private
  */
-export const getChallanById = catchAsync(async (req, res) => {});
+export const getChallanById = catchAsync(async (req, res) => {
+  const challanId = +req.params.challanId;
+
+  const challan = await prisma.challan.findUnique({ where: { id: challanId } });
+
+  return res.status(200).json({
+    status: "success",
+    challan,
+  });
+});
 
 /**
  * @description   Update challan by id to paid
  * @route         PATCH /challans/:challanId
  * @access        private
  */
-export const updateChallanToPaid = catchAsync(async (req, res) => {});
+export const updateChallanToPaid = catchAsync(async (req, res) => {
+  const challanId = +req.params.challanId;
+
+  await prisma.challan.update({
+    where: { id: challanId },
+    data: { status: "PAID" },
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "Challan Paid",
+  });
+});
 
 /**
  * @description   Delete challan by id
