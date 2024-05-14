@@ -170,18 +170,25 @@ export const authenticate = catchAsync(async (req, res, next) => {
 
   if (!decoded) return next(new Error("Not authenticated"));
 
-  req.body.auth = { id: decoded.id, role: decoded.role };
+  const auth = {
+    id: decoded.id,
+    role: decoded.role,
+    uid: null,
+    officerId: null,
+  };
 
   switch (decoded.role) {
     case "user":
-      req.body.auth.uid = decoded.uid;
+      auth.uid = decoded.uid;
       break;
     case "officer":
-      req.body.auth.officerId = decoded.officerId;
+      auth.officerId = decoded.officerId;
       break;
     default:
       break;
   }
+
+  req.body.auth = auth;
 
   next();
 });

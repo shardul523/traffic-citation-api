@@ -64,3 +64,22 @@ export const deleteVehicleByPlate: RequestHandler = catchAsync(
     });
   }
 );
+
+/**
+ * @description   Register vehicle if it does not exist
+ * @route         MIDDLEWARE
+ * @access        private -> officer
+ */
+export const registerVehicleIfAbsent = catchAsync(async (req, res, next) => {
+  const { licencePlate, vehicleType }: Prisma.VehicleCreateInput = req.body;
+
+  const vehicle = await prisma.vehicle.findUnique({ where: { licencePlate } });
+
+  if (vehicle) return next();
+
+  await prisma.vehicle.create({
+    data: { licencePlate, vehicleType },
+  });
+
+  next();
+});

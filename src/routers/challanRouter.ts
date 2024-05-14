@@ -7,23 +7,27 @@ import {
   getChallanById,
   getOfficerChallans,
   getUserChallans,
-  sendVehicleDetails,
+  getVehiclePlate,
   updateChallanToPaid,
 } from "../controllers/challanControllers";
 import { authenticate, authorize } from "../controllers/authControllers";
 import { uploadVehicleImage } from "../utils/multer";
+import { registerVehicleIfAbsent } from "../controllers/vehicleControllers";
 
 const router = Router();
 
-// router.post("/vehicle-image", sendVehicleNumberPlate);
-
-router.post("/upload/vehicle-image", uploadVehicleImage, sendVehicleDetails);
-
-router.use(authenticate);
-
 router
   .route("/")
-  .post(authorize("officer"), uploadVehicleImage, createNewChallan);
+  .post(
+    uploadVehicleImage,
+    authenticate,
+    authorize("officer"),
+    getVehiclePlate,
+    registerVehicleIfAbsent,
+    createNewChallan
+  );
+
+router.use(authenticate);
 
 router.get("/officer/me", authorize("officer"), getOfficerChallans);
 

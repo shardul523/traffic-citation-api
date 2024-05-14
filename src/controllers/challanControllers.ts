@@ -1,6 +1,6 @@
 import path from "path";
 
-// import { py, pyModule } from "../config/py";
+import { py, pyModule } from "../config/py";
 import {
   catchAsync,
   extractCharactersAfterPattern,
@@ -8,21 +8,24 @@ import {
 } from "../utils";
 import { prisma } from "../config/db";
 
-// export const sendVehicleNumberPlate = catchAsync(async (req, res) => {
-//   const result: any = await py.call(
-//     pyModule,
-//     "number_plate_reader",
-//     path.join(__dirname, "..", "data/images", "car.jpg")
-//   );
+/**
+ * @description   Get vehicle number plate from image
+ * @route         MIDDLEWARE
+ * @access        private -> officer
+ */
+export const getVehiclePlate = catchAsync(async (req, res, next) => {
+  const result: any = await py.call(
+    pyModule,
+    "number_plate_reader",
+    path.join(__dirname, "..", "..", "data", "images", req.file.filename)
+  );
 
-//   res.send(extractCharactersAfterPattern(result, "Number Plate:"));
-// });
+  req.body.licencePlate = extractCharactersAfterPattern(
+    result,
+    "Number Plate:"
+  ).trim();
 
-export const sendVehicleDetails = catchAsync(async (req, res, next) => {
-  res.status(200).json({
-    status: "success",
-    file: req.file,
-  });
+  next();
 });
 
 /**
