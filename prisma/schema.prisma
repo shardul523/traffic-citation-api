@@ -21,7 +21,9 @@ enum ChallanStatus {
 
 enum VehicleType {
   TWO_WHEELER
+  THREE_WHEELER
   FOUR_WHEELER
+  FOUR_WHEELER_HEAVY
 }
 
 model Challan {
