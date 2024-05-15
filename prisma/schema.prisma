@@ -33,6 +33,7 @@ model Challan {
   violation           String
   fineAmount          Float
   status              ChallanStatus
+  image               String?
   Vehicle             Vehicle       @relation(fields: [vehicleLicensePlate], references: [licencePlate])
   vehicleLicensePlate String
   Officer             Officer?      @relation(fields: [officerId], references: [officerId])

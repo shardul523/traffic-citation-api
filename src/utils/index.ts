@@ -26,3 +26,12 @@ export function getViolationFine(violation: string): number {
       return 1500;
   }
 }
+
+export function sanitizeNumberPlate(plate: string): string {
+  const allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return plate
+    .trim()
+    .split("")
+    .filter((ch) => allowedChars.includes(ch))
+    .join("");
+}

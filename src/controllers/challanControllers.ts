@@ -5,6 +5,7 @@ import {
   catchAsync,
   extractCharactersAfterPattern,
   getViolationFine,
+  sanitizeNumberPlate,
 } from "../utils";
 import { prisma } from "../config/db";
 
@@ -14,16 +15,24 @@ import { prisma } from "../config/db";
  * @access        private -> officer
  */
 export const getVehiclePlate = catchAsync(async (req, res, next) => {
-  const result: any = await py.call(
-    pyModule,
-    "number_plate_reader",
-    path.join(__dirname, "..", "..", "data", "images", req.file.filename)
+  const imagePath = path.join(
+    __dirname,
+    "..",
+    "public",
+    "images",
+    req.file.filename
   );
 
-  req.body.licencePlate = extractCharactersAfterPattern(
-    result,
-    "Number Plate:"
-  ).trim();
+  const result: any = await py.call(pyModule, "number_plate_reader", imagePath);
+
+  //
+  if (!result) return next(new Error("Number Plate could not be detected!"));
+
+  req.body.licencePlate = sanitizeNumberPlate(
+    extractCharactersAfterPattern(result, "Number Plate:")
+  );
+
+  req.body.image = path.join("images", req.file.filename);
 
   next();
 });
@@ -38,10 +47,12 @@ export const createNewChallan = catchAsync(async (req, res, next) => {
     licencePlate: vehicleLicensePlate,
     violation,
     auth,
+    image,
   }: {
     licencePlate: string;
     violation: string;
     auth: { officerId: string };
+    image: string;
   } = req.body;
 
   if (!vehicleLicensePlate)
@@ -59,6 +70,7 @@ export const createNewChallan = catchAsync(async (req, res, next) => {
       fineAmount,
       violation,
       status: "ISSUED",
+      image,
     },
   });
 

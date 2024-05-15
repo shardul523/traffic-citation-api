@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../config/db";
 import { RequestHandler } from "express";
-import { catchAsync } from "../utils";
+import { catchAsync, sanitizeNumberPlate } from "../utils";
 
 /**
  * @description     Register new vehicle
@@ -13,10 +13,11 @@ export const registerNewVehicle = catchAsync(async (req, res, next) => {
   const { auth } = req.body;
   const { uid }: { uid: string } = auth;
 
-  if (!licencePlate) return next(new Error("Invalid license plate"));
+  const validatedLicencePlate = sanitizeNumberPlate(licencePlate);
+  if (!validatedLicencePlate) return next(new Error("Invalid license plate"));
 
   const newVehicle = await prisma.vehicle.create({
-    data: { licencePlate, uid, vehicleType },
+    data: { licencePlate: validatedLicencePlate, uid, vehicleType },
   });
 
   return res.status(201).json({
