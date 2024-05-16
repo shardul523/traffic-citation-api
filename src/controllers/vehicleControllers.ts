@@ -16,13 +16,24 @@ export const registerNewVehicle = catchAsync(async (req, res, next) => {
   const validatedLicencePlate = sanitizeNumberPlate(licencePlate);
   if (!validatedLicencePlate) return next(new Error("Invalid license plate"));
 
-  const newVehicle = await prisma.vehicle.create({
-    data: { licencePlate: validatedLicencePlate, uid, vehicleType },
+  let vehicle = await prisma.vehicle.findUnique({
+    where: { licencePlate: validatedLicencePlate },
   });
+
+  if (!validatedLicencePlate) {
+    vehicle = await prisma.vehicle.create({
+      data: { licencePlate: validatedLicencePlate, uid, vehicleType },
+    });
+  } else {
+    await prisma.vehicle.update({
+      where: { licencePlate: validatedLicencePlate },
+      data: { uid },
+    });
+  }
 
   return res.status(201).json({
     status: "success",
-    vehicle: newVehicle,
+    vehicle,
   });
 });
 
