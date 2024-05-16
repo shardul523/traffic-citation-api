@@ -112,8 +112,6 @@ export const getUserChallans = catchAsync(async (req, res) => {
 
   const licencePlates = user.vehicles.map((vehicle) => vehicle.licencePlate);
 
-  console.log(licencePlates);
-
   const challans = await prisma.challan.findMany({
     where: { vehicleLicensePlate: { in: licencePlates } },
   });
